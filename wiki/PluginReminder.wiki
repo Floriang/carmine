@@ -12,7 +12,7 @@ This plugin notifies you at a specified time. It is very helpful to remember qui
 
 {{{remind me in 1h 30m about Pizza is probably a little dusty by now}}}
 
-===Remind me at a specific time===
+===Remind me at a specific time today===
 
 {{{remind me at 19:30 about Pick GF up from airport}}}
 
@@ -21,4 +21,3 @@ This plugin notifies you at a specified time. It is very helpful to remember qui
 {{{remind me on 01.01.2010 at 00:00 about Happy New Year!}}}
 
 Carmine answers with a short confirmation and will come back to you with your reminder at the specified time.
-
