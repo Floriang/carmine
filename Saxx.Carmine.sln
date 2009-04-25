@@ -1,0 +1,44 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 10.00
+# Visual Studio 2008
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Saxx.Carmine", "Saxx.Carmine\Saxx.Carmine.csproj", "{5B3D26C1-8ECA-444D-8CD7-FCF93AB82654}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Saxx.Carmine.Shared", "Saxx.Carmine.Shared\Saxx.Carmine.Shared.csproj", "{97CB86F1-D300-4F3F-AB1F-C7730F13E521}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Saxx.Carmine.Plugins.Gcal", "Saxx.Carmine.Plugins.Gcal\Saxx.Carmine.Plugins.Gcal.csproj", "{4653CAD6-1609-41A7-B50C-1BF5DE9A8752}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Saxx.Carmine.Plugins.Reminder", "Saxx.Carmine.Plugins.Reminder\Saxx.Carmine.Plugins.Reminder.csproj", "{CE4A0F16-4726-4FFA-9925-7D28F9DB7C1A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Saxx.Carmine.Plugins.Twitter", "Saxx.Carmine.Plugins.Twitter\Saxx.Carmine.Plugins.Twitter.csproj", "{21FD4DD8-1F9D-471B-9518-5802D7F4BE8D}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{5B3D26C1-8ECA-444D-8CD7-FCF93AB82654}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5B3D26C1-8ECA-444D-8CD7-FCF93AB82654}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5B3D26C1-8ECA-444D-8CD7-FCF93AB82654}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5B3D26C1-8ECA-444D-8CD7-FCF93AB82654}.Release|Any CPU.Build.0 = Release|Any CPU
+		{97CB86F1-D300-4F3F-AB1F-C7730F13E521}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{97CB86F1-D300-4F3F-AB1F-C7730F13E521}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{97CB86F1-D300-4F3F-AB1F-C7730F13E521}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{97CB86F1-D300-4F3F-AB1F-C7730F13E521}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4653CAD6-1609-41A7-B50C-1BF5DE9A8752}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4653CAD6-1609-41A7-B50C-1BF5DE9A8752}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4653CAD6-1609-41A7-B50C-1BF5DE9A8752}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4653CAD6-1609-41A7-B50C-1BF5DE9A8752}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CE4A0F16-4726-4FFA-9925-7D28F9DB7C1A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CE4A0F16-4726-4FFA-9925-7D28F9DB7C1A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CE4A0F16-4726-4FFA-9925-7D28F9DB7C1A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CE4A0F16-4726-4FFA-9925-7D28F9DB7C1A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{21FD4DD8-1F9D-471B-9518-5802D7F4BE8D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{21FD4DD8-1F9D-471B-9518-5802D7F4BE8D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{21FD4DD8-1F9D-471B-9518-5802D7F4BE8D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{21FD4DD8-1F9D-471B-9518-5802D7F4BE8D}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
