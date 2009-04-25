@@ -16,4 +16,4 @@ public class Ping : Plugin {
 }
 }}}
 
-The only thing you have to remember when writing a plugin is to derive your class from {{{Saxx.Carmine.Plugin}}}. This abstract class provides a lot of methods you can overwrite to add functionality. The overriden method {{{Message}}} in the example above is probably the most important one - it gets whenever somebody sends a message to Carmine.
+The only thing you have to remember when writing a plugin is to derive your class from {{{Saxx.Carmine.Plugin}}}. This abstract class provides a lot of methods you can overwrite to add functionality to your plugin. The overridden method {{{Message}}} in the example above is probably the most important one - it gets called whenever somebody sends a message to Carmine.
