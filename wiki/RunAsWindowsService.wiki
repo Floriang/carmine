@@ -19,6 +19,6 @@ And to stop it:
 {{{net stop Carmine}}} 
 
 
-Of course you can use Administrative Tools -> Services to start and stop the service or to configure the startup type (for now it is set to "Manual"). Finally, if you want to remove the Carmine service again, type:
+Of course you can use Administrative Tools > Services to start and stop the service or to configure the startup type (for now it is set to "Manual"). Finally, if you want to remove the Carmine service again, type:
 
 {{{sc delete Carmine}}} 
