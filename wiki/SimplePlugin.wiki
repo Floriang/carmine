@@ -2,7 +2,7 @@
 
 It is extremely easy to add a plugin to carmine - just drop an assembly or even a plain C# or VB.NET source file into the {{{\Plugins\}}} subdirectory of your Carmine installation.
 
-An example: Paste the code below in a textfile called {{{HelloWorld.cs}}} and put it into the {{{\Plugins\}}} subdirectory. It takes only a few seconds while Carmine recognizes this new plugin (no need to restart), compiles it on the fly and makes it available. Try it out by sending Carmine a {{{Hello}}} through your Jabber client.
+An example: Paste the code below into a textfile called {{{HelloWorld.cs}}} and put it into the {{{\Plugins\}}} subdirectory. It takes only a few seconds while Carmine recognizes this new plugin (no need to restart), compiles it on the fly and makes it available. Try it out by sending Carmine a {{{Hello}}} through your Jabber client.
 
 {{{
 using System;
