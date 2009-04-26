@@ -19,6 +19,9 @@ namespace Saxx.Carmine {
         public virtual void Dispose() {
         }
 
+        public virtual void Tick() {
+        }
+
         protected IBot Bot {
             get;
             set;
