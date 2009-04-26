@@ -8,7 +8,7 @@ using Google.GData.Client;
 namespace Saxx.Carmine.Plugins {
     public partial class Gcal {
 
-        private void PrintEvents(string from) {
+        private void PrintEvents(string from, int daysFromToday) {
             Log(LogType.Info, "Printing events for " + from);
             var userData = GetUserData(from);
             if (userData == null) {
@@ -17,10 +17,10 @@ namespace Saxx.Carmine.Plugins {
             }
             else {
                 try {
-                    var events = GetEvents("hannes.sachsenhofer@gmail.com", "sien.Turn").ToList();
+                    var events = GetEvents(userData.UserName, userData.Password, daysFromToday).ToList();
 
                     if (events.Count > 0)
-                        SendMessage(from, "Your events for today: ");
+                        SendMessage(from, "Your events for " + (daysFromToday == 0 ? "today" : (daysFromToday == 1 ? "tomorrow" : DateTime.Now.AddDays(daysFromToday).ToString("dddd, dd. MMMM yyyy"))) + ": ");
                     else
                         SendMessage(from, "No events scheduled for today :)");
                     foreach (var evnt in events)
@@ -33,7 +33,7 @@ namespace Saxx.Carmine.Plugins {
             }
         }
 
-        private IEnumerable<Event> GetEvents(string user, string password) {
+        private IEnumerable<Event> GetEvents(string user, string password, int daysFromToday) {
             Log(LogType.Info, "Loading Gcal events for " + user);
             var result = new List<Event>();
 
@@ -44,8 +44,8 @@ namespace Saxx.Carmine.Plugins {
 
             foreach (var uri in calendars.Select(x => x.Uri)) {
                 var eventQuery = new EventQuery(uri.ToString());
-                eventQuery.StartTime = DateTime.Now.ToUniversalTime().Date;
-                eventQuery.EndTime = DateTime.Now.ToUniversalTime().Date.AddDays(1);
+                eventQuery.StartTime = DateTime.Now.AddDays(daysFromToday).ToUniversalTime().Date;
+                eventQuery.EndTime = DateTime.Now.AddDays(daysFromToday + 1).ToUniversalTime().Date;
                 eventQuery.SortOrder = CalendarSortOrder.ascending;
                 var eventFeed = calendarService.Query(eventQuery);
                 foreach (EventEntry eventEntry in eventFeed.Entries) {
