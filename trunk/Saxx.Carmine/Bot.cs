@@ -8,9 +8,9 @@ using System.Threading;
 using bedrock;
 using jabber;
 using jabber.client;
+using jabber.connection.sasl;
 using jabber.protocol.client;
 using jabber.protocol.iq;
-using jabber.connection.sasl;
 
 namespace Saxx.Carmine {
     public partial class Bot : MarshalByRefObject, IBot {
@@ -19,6 +19,8 @@ namespace Saxx.Carmine {
         private RosterManager _rosterManager;
         private PresenceManager _presenceManager;
         private PluginManager _pluginManager;
+        private Thread _thread;
+        private bool _stopThread;
 
         private IEnumerable<Plugin> Plugins {
             get;
@@ -39,7 +41,7 @@ namespace Saxx.Carmine {
 
             _presenceManager = new PresenceManager();
             _presenceManager.Stream = _client;
-       
+
             _client.OnInvalidCertificate += new RemoteCertificateValidationCallback(client_OnInvalidCertificate);
             _client.OnError += new bedrock.ExceptionHandler(client_OnError);
             _client.OnMessage += new MessageHandler(client_OnMessage);
@@ -50,6 +52,19 @@ namespace Saxx.Carmine {
             _client.OnRegistered += new IQHandler(client_OnRegistered);
 
             InitPlugins();
+
+            _thread = new Thread(new ThreadStart(delegate() {
+                while (!_stopThread) {
+                    foreach (var plugin in Plugins)
+                        try {
+                            plugin.Tick();
+                        }
+                        catch (Exception ex) {
+                            Log(LogType.Error, "A plugin threw an exception: ", ex);
+                        }
+                    Thread.Sleep(Settings.TickInterval);
+                }
+            }));
         }
 
         private void InitPlugins() {
@@ -101,12 +116,17 @@ namespace Saxx.Carmine {
                 catch (Exception ex) {
                     Log(LogType.Error, "A plugin threw an exception: ", ex);
                 }
+
+            _stopThread = false;
+            _thread.Start();
         }
 
         public void Disconnect() {
             Log(LogType.Info, "Disconnecting");
             _client.Close();
             _pluginManager.Stop();
+
+            _stopThread = true;
         }
 
         private void client_OnDisconnect(object sender) {

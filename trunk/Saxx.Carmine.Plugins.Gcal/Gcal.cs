@@ -4,87 +4,62 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using Google.GData.Calendar;
 using Google.GData.Client;
+using System.Data;
 
 namespace Saxx.Carmine.Plugins {
-    public class Gcal : Plugin {
+    public partial class Gcal : Plugin {
 
         public override void Message(string from, string message) {
-            var match = Regex.Match(message, "^gcal register (?<UserName>.*?) (?<Password>.*)$", RegexOptions.IgnoreCase);
+            var match = Regex.Match(message, "^gcal register (?<username>.*?) (?<password>.*?)( (?<sendsummary>sendsummary))?$", RegexOptions.IgnoreCase);
             if (match.Success) {
                 Log(LogType.Info, "Registering user data for " + from);
                 var userData = new UserData() {
                     Id = from,
                     LastCheck = DateTime.Now,
-                    UserName = match.Groups["UserName"].Value,
-                    Password = match.Groups["Password"].Value
+                    UserName = match.Groups["username"].Value,
+                    Password = match.Groups["password"].Value,
+                    SendSummary = match.Groups["sendsummary"] != null && !string.IsNullOrEmpty(match.Groups["sendsummary"].Value)
                 };
                 SetUserData(userData);
                 PrintEvents(from);
             }
-            else if (message.Equals("gcal", StringComparison.InvariantCultureIgnoreCase)) {
+
+            match = Regex.Match(message, "^gcal add (?<event>.*)$", RegexOptions.IgnoreCase);
+            if (match.Success)
+                AddEvent(from, match.Groups["event"].Value);
+
+            if (message.Equals("gcal", StringComparison.InvariantCultureIgnoreCase)) {
                 PrintEvents(from);
             }
         }
 
-        private void PrintEvents(string from) {
-            Log(LogType.Info, "Printing events for " + from);
-            var userData = GetUserData(from);
-            if (userData == null) {
-                SendMessage(from, "No Google credentials found for you :(");
-                Log(LogType.Info, "No Google credentials " + from + " in the database");
-            }
-            else {
-                try {
-                    var events = GetEvents("hannes.sachsenhofer@gmail.com", "sien.Turn").ToList();
-
-                    if (events.Count > 0)
-                        SendMessage(from, "Your events for today: ");
-                    else
-                        SendMessage(from, "No events scheduled for today :)");
-                    foreach (var evnt in events)
-                        SendMessage(from, (string.IsNullOrEmpty(evnt.Time) ? "" : "_" + evnt.Time + "_  ") + evnt.Title);
-                }
-                catch (Exception ex) {
-                    SendMessage(from, "There was an error while loading your events :(");
-                    Log(LogType.Error, "Error while loading events for " + userData.UserName + ": ", ex);
-                }
+        private DateTime _lastDate = DateTime.Now.Date;
+        public override void Tick() {
+            if (_lastDate < DateTime.Now.Date) {
+                foreach (var userdata in GetUserData().Where(x => x.SendSummary))
+                    PrintEvents(userdata.Id);
+                _lastDate = DateTime.Now.Date;
             }
         }
 
-        private IEnumerable<Event> GetEvents(string user, string password) {
-            Log(LogType.Info, "Loading Gcal events for " + user);
-            var result = new List<Event>();
+        private IEnumerable<Calendar> GetCalendars(CalendarService calendarService) {
+            var result = new List<Calendar>();
 
-            var calendarService = new CalendarService("Carmine");
-            calendarService.setUserCredentials(user, password);
-
-            var calendarUris = new List<string>();
             var calendarsQuery = new FeedQuery("http://www.google.com/calendar/feeds/default/allcalendars/full");
             var calendarsFeed = calendarService.Query(calendarsQuery);
             foreach (var calendarsEntry in calendarsFeed.Entries) {
+                var calendar = new Calendar();
+
                 var fullUri = calendarsEntry.Links.First(x => x.Rel == "self").HRef.Content;
                 var calendarId = fullUri.Substring(fullUri.LastIndexOf("/") + 1);
-                calendarUris.Add("http://www.google.com/calendar/feeds/" + calendarId + "/private/full");
+
+                calendar.Uri = new Uri("http://www.google.com/calendar/feeds/" + calendarId + "/private/full");
+                calendar.Name = calendarsEntry.Title.Text;
+
+                result.Add(calendar);
             }
 
-            foreach (var uri in calendarUris) {
-                var eventQuery = new EventQuery(uri);
-                eventQuery.StartTime = DateTime.Now.ToUniversalTime().Date;
-                eventQuery.EndTime = DateTime.Now.ToUniversalTime().Date.AddDays(1);
-                eventQuery.SortOrder = CalendarSortOrder.ascending;
-                var eventFeed = calendarService.Query(eventQuery);
-                foreach (EventEntry eventEntry in eventFeed.Entries) {
-                    var evnt = new Event();
-                    result.Add(evnt);
-
-                    var eventTime = eventEntry.Times.FirstOrDefault();
-                    if (eventTime != null && !eventTime.AllDay)
-                        evnt.Time = eventTime.StartTime.ToString("HH:mm");
-                    evnt.Title = eventEntry.Title.Text;
-                }
-            }
-
-            return result.OrderBy(x => x.Time);
+            return result;
         }
 
         public override string ToString() {
@@ -98,6 +73,18 @@ namespace Saxx.Carmine.Plugins {
             }
 
             public string Time {
+                get;
+                set;
+            }
+        }
+
+        private class Calendar {
+            public string Name {
+                get;
+                set;
+            }
+
+            public Uri Uri {
                 get;
                 set;
             }
@@ -124,27 +111,35 @@ namespace Saxx.Carmine.Plugins {
                 get;
                 set;
             }
+
+            public bool SendSummary {
+                get;
+                set;
+            }
+        }
+
+        private IEnumerable<UserData> GetUserData() {
+            var result = new List<UserData>();
+            Log(LogType.Info, "Loading all user data");
+            using (var db = GetDatabase(DatabaseName)) {
+                SetupDatabase(db);
+
+                var reader = db.ExecuteReader("SELECT [Id], [UserName], [Password], [LastCheck], [SendSummary] FROM [UserData]");
+                if (reader.Read())
+                    result.Add(ReadUserData(reader));
+            }
+
+            return result;
         }
 
         private UserData GetUserData(string id) {
             Log(LogType.Info, "Loading user data for " + id);
             using (var db = GetDatabase(DatabaseName)) {
-                try {
-                    db.ExecuteReader("SELECT Count(*) FROM [UserData];");
-                }
-                catch {
-                    SetupDatabase(db);
-                }
+                SetupDatabase(db);
 
-                var reader = db.ExecuteReader("SELECT [Id], [UserName], [Password], [LastCheck] FROM [UserData] WHERE [Id] = ?", id);
-                if (reader.Read()) {
-                    var userData = new UserData();
-                    userData.Id = (string)reader["Id"];
-                    userData.UserName = (string)reader["UserName"];
-                    userData.Password = (string)reader["Password"];
-                    userData.LastCheck = (DateTime)reader["LastCheck"];
-                    return userData;
-                }
+                var reader = db.ExecuteReader("SELECT [Id], [UserName], [Password], [LastCheck], [SendSummary] FROM [UserData] WHERE [Id] = ?", id);
+                if (reader.Read())
+                    return ReadUserData(reader);
                 return null;
             }
         }
@@ -152,19 +147,36 @@ namespace Saxx.Carmine.Plugins {
         private void SetUserData(UserData userData) {
             Log(LogType.Info, "Saving user data for " + userData.Id);
             using (var db = GetDatabase(DatabaseName)) {
+                SetupDatabase(db);
                 db.ExecuteCommand("DELETE FROM [UserData] WHERE [Id] = ?;", userData.Id);
-                db.ExecuteCommand("INSERT INTO [UserData] ([Id], [UserName], [Password], [LastCheck]) VALUES (?, ?, ?, ?);", userData.Id, userData.UserName, userData.Password, userData.LastCheck);
+                db.ExecuteCommand("INSERT INTO [UserData] ([Id], [UserName], [Password], [LastCheck], [SendSummary]) VALUES (?, ?, ?, ?, ?);", userData.Id, userData.UserName, userData.Password, userData.LastCheck, userData.SendSummary);
             }
         }
 
+        private UserData ReadUserData(IDataReader reader) {
+            var userData = new UserData();
+            userData.Id = (string)reader["Id"];
+            userData.UserName = (string)reader["UserName"];
+            userData.Password = (string)reader["Password"];
+            userData.LastCheck = (DateTime)reader["LastCheck"];
+            userData.SendSummary = (bool)reader["SendSummary"];
+            return userData;
+        }
+
         private void SetupDatabase(IDatabase db) {
-            db.ExecuteCommand("CREATE TABLE [UserData] ("
-                + "[Id] NVARCHAR(1000) NOT NULL PRIMARY KEY,"
-                + "[UserName] NVARCHAR(1000) NOT NULL,"
-                + "[Password] NVARCHAR(1000) NOT NULL,"
-                + "[LastCheck] TIMESTAMP NOT NULL"
-                + ");");
-            db.ExecuteCommand("PRAGMA auto_vacuum = 1;");
+            try {
+                db.ExecuteReader("SELECT Count(*) FROM [UserData];");
+            }
+            catch {
+                db.ExecuteCommand("CREATE TABLE [UserData] ("
+                    + "[Id] NVARCHAR(1000) NOT NULL PRIMARY KEY,"
+                    + "[UserName] NVARCHAR(1000) NOT NULL,"
+                    + "[Password] NVARCHAR(1000) NOT NULL,"
+                    + "[LastCheck] TIMESTAMP NOT NULL,"
+                    + "[SendSummary] BIT NOT NULL,"
+                    + ");");
+                db.ExecuteCommand("PRAGMA auto_vacuum = 1;");
+            }
         }
 
         private string DatabaseName {

@@ -51,5 +51,11 @@ namespace Saxx.Carmine {
                 return Path.GetDirectoryName(Environment.GetCommandLineArgs()[0]);
             }
         }
+
+        public static int TickInterval {
+            get {
+                return Get("tick-interval", 30000);
+            }
+        }
     }
 }
