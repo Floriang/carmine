@@ -46,6 +46,8 @@ namespace Saxx.Carmine {
                 return new SQLiteParameter(DbType.Int32, parameter);
             if (parameter is DateTime)
                 return new SQLiteParameter(DbType.DateTime, parameter);
+            if (parameter is bool)
+                return new SQLiteParameter(DbType.Boolean, parameter);
             return null;
         }
 

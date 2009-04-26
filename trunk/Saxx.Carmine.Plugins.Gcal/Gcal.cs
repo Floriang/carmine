@@ -173,7 +173,7 @@ namespace Saxx.Carmine.Plugins {
                     + "[UserName] NVARCHAR(1000) NOT NULL,"
                     + "[Password] NVARCHAR(1000) NOT NULL,"
                     + "[LastCheck] TIMESTAMP NOT NULL,"
-                    + "[SendSummary] BIT NOT NULL,"
+                    + "[SendSummary] BIT NOT NULL"
                     + ");");
                 db.ExecuteCommand("PRAGMA auto_vacuum = 1;");
             }
