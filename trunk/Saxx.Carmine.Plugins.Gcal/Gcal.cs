@@ -21,23 +21,33 @@ namespace Saxx.Carmine.Plugins {
                     SendSummary = match.Groups["sendsummary"] != null && !string.IsNullOrEmpty(match.Groups["sendsummary"].Value)
                 };
                 SetUserData(userData);
-                PrintEvents(from);
+                PrintEvents(from, 0);
+                return;
             }
 
             match = Regex.Match(message, "^gcal add (?<event>.*)$", RegexOptions.IgnoreCase);
-            if (match.Success)
+            if (match.Success) {
                 AddEvent(from, match.Groups["event"].Value);
-
-            if (message.Equals("gcal", StringComparison.InvariantCultureIgnoreCase)) {
-                PrintEvents(from);
+                return;
             }
+
+            match = Regex.Match(message, @"^gcal (?<days>\d*)$", RegexOptions.IgnoreCase);
+            if (match.Success) {
+                PrintEvents(from, Convert.ToInt32(match.Groups["days"].Value));
+                return;
+            }
+
+            if (message.Equals("gcal tomorrow", StringComparison.InvariantCultureIgnoreCase))
+                PrintEvents(from, 1);
+            else if (message.Equals("gcal", StringComparison.InvariantCultureIgnoreCase))
+                PrintEvents(from, 0);
         }
 
         private DateTime _lastDate = DateTime.Now.Date;
         public override void Tick() {
             if (_lastDate < DateTime.Now.Date) {
                 foreach (var userdata in GetUserData().Where(x => x.SendSummary))
-                    PrintEvents(userdata.Id);
+                    PrintEvents(userdata.Id, 0);
                 _lastDate = DateTime.Now.Date;
             }
         }
