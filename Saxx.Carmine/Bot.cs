@@ -5,8 +5,12 @@ using System.Net.Security;
 using System.Reflection;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading;
+using bedrock;
+using jabber;
 using jabber.client;
 using jabber.protocol.client;
+using jabber.protocol.iq;
+using jabber.connection.sasl;
 
 namespace Saxx.Carmine {
     public partial class Bot : MarshalByRefObject, IBot {
@@ -24,7 +28,9 @@ namespace Saxx.Carmine {
         public Bot() {
             _client = new JabberClient();
             _client.AutoRoster = true;
-            _client.AutoReconnect = 10;
+            _client.AutoReconnect = 0;
+            _client.AutoLogin = false;
+            _client.Resource = "Carmine";
 
             _rosterManager = new RosterManager();
             _rosterManager.Stream = _client;
@@ -37,8 +43,12 @@ namespace Saxx.Carmine {
             _client.OnInvalidCertificate += new RemoteCertificateValidationCallback(client_OnInvalidCertificate);
             _client.OnError += new bedrock.ExceptionHandler(client_OnError);
             _client.OnMessage += new MessageHandler(client_OnMessage);
-            _client.OnDisconnect += new bedrock.ObjectHandler(client_OnDisconnect);
-            
+            _client.OnDisconnect += new ObjectHandler(client_OnDisconnect);
+
+            _client.OnLoginRequired += new ObjectHandler(client_OnLoginRequired);
+            _client.OnRegisterInfo += new RegisterInfoHandler(client_OnRegisterInfo);
+            _client.OnRegistered += new IQHandler(client_OnRegistered);
+
             InitPlugins();
         }
 
@@ -70,13 +80,13 @@ namespace Saxx.Carmine {
             };
         }
 
-        public void Connect(string user, string server, string password) {
+        public void Connect() {
             _pluginManager.Start();
 
             Log(LogType.Info, "Connecting");
-            _client.User = user;
-            _client.Server = server;
-            _client.Password = password;
+            _client.User = Settings.JabberUser;
+            _client.Server = Settings.JabberServer;
+            _client.Password = Settings.JabberPassword;
             _client.Connect();
 
             while (!_client.IsAuthenticated)
@@ -125,7 +135,25 @@ namespace Saxx.Carmine {
         }
 
         private void client_OnError(object sender, Exception ex) {
-            Log(LogType.Fatal, "The client threw an exception: ", ex);
+            if (ex is AuthenticationFailedException)
+                Log(LogType.Fatal, "Authentication failed. Check your Jabber credentials. The user you want to register probably already exists on the server.");
+            else
+                Log(LogType.Fatal, "The Jabber client threw an exception: ", ex);
+            Environment.Exit(-1);
+        }
+
+        void client_OnRegistered(object sender, IQ iq) {
+            Log(LogType.Info, "Logging in");
+            _client.Login();
+        }
+
+        bool client_OnRegisterInfo(object sender, Register register) {
+            return true;
+        }
+
+        void client_OnLoginRequired(object sender) {
+            Log(LogType.Info, "Registering");
+            _client.Register(new JID(Settings.JabberUser, Settings.JabberServer, null));
         }
 
         //required for the pass-through to the other appdomain

@@ -29,11 +29,13 @@ namespace Saxx.Carmine.Plugins {
         }
 
         public override void Disconnect() {
-            _thread.Abort();
+            if (_thread != null)
+                _thread.Abort();
         }
 
         public override void Dispose() {
-            _thread.Abort();
+            if (_thread != null)
+                _thread.Abort();
         }
 
         public override string ToString() {

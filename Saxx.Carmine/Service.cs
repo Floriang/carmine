@@ -1,4 +1,5 @@
 ﻿using System.ServiceProcess;
+using System;
 
 namespace Saxx.Carmine {
     public partial class Service : ServiceBase {
@@ -11,7 +12,7 @@ namespace Saxx.Carmine {
         protected override void OnStart(string[] args) {
             Logger.Log(LogType.Info, "Starting in service mode");
             _bot = new Bot();
-            _bot.Connect(Settings.Get("user", "Carmine"), Settings.Get("server", "jabber.org"), Settings.Get("password", "asdf"));
+            _bot.Connect();
         }
 
         protected override void OnStop() {
