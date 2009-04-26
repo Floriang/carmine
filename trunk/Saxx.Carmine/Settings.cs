@@ -22,6 +22,24 @@ namespace Saxx.Carmine {
             return bool.Parse(Get(key, defaultValue.ToString()));
         }
 
+        public static string JabberUser {
+            get {
+                return Get("user", "Carmine");
+            }
+        }
+
+        public static string JabberServer {
+            get {
+                return Get("server", "jabber.org");
+            }
+        }
+
+        public static string JabberPassword {
+            get {
+                return Get("password", "");
+            }
+        }
+
         public static string PluginsDirectory {
             get {
                 return Path.Combine(RootDirectory, "Plugins");
