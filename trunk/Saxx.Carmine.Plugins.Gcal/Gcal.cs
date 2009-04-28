@@ -31,7 +31,7 @@ namespace Saxx.Carmine.Plugins {
                 return;
             }
 
-            match = Regex.Match(message, @"^gcal (?<days>\d*)$", RegexOptions.IgnoreCase);
+            match = Regex.Match(message, @"^gcal (?<days>-?\d*)$", RegexOptions.IgnoreCase);
             if (match.Success) {
                 PrintEvents(from, Convert.ToInt32(match.Groups["days"].Value));
                 return;

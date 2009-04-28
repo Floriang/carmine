@@ -17,12 +17,12 @@ namespace Saxx.Carmine.Plugins {
             }
             else {
                 try {
+                    SendMessage(from, "Your events for " + (daysFromToday == 0 ? "today" : (daysFromToday == 1 ? "tomorrow" : DateTime.Now.AddDays(daysFromToday).ToString("dddd, dd. MMMM yyyy"))) + ": ");
+
                     var events = GetEvents(userData.UserName, userData.Password, daysFromToday).ToList();
 
-                    if (events.Count > 0)
-                        SendMessage(from, "Your events for " + (daysFromToday == 0 ? "today" : (daysFromToday == 1 ? "tomorrow" : DateTime.Now.AddDays(daysFromToday).ToString("dddd, dd. MMMM yyyy"))) + ": ");
-                    else
-                        SendMessage(from, "No events scheduled for today :)");
+                    if (events.Count <= 0)
+                        SendMessage(from, "No events scheduled");
                     foreach (var evnt in events)
                         SendMessage(from, (string.IsNullOrEmpty(evnt.Time) ? "" : "_" + evnt.Time + "_  ") + evnt.Title);
                 }
@@ -41,18 +41,25 @@ namespace Saxx.Carmine.Plugins {
             calendarService.setUserCredentials(user, password);
             var calendars = GetCalendars(calendarService);
 
+            var startDate = DateTime.Now.AddDays(daysFromToday).Date;
+            var endDate = DateTime.Now.AddDays(daysFromToday + 1).Date;
 
             foreach (var uri in calendars.Select(x => x.Uri)) {
                 var eventQuery = new EventQuery(uri.ToString());
-                eventQuery.StartTime = DateTime.Now.AddDays(daysFromToday).ToUniversalTime().Date;
-                eventQuery.EndTime = DateTime.Now.AddDays(daysFromToday + 1).ToUniversalTime().Date;
+                eventQuery.StartTime = startDate;
+                eventQuery.EndTime = endDate;
                 eventQuery.SortOrder = CalendarSortOrder.ascending;
                 var eventFeed = calendarService.Query(eventQuery);
                 foreach (EventEntry eventEntry in eventFeed.Entries) {
+                    var eventTime = eventEntry.Times.FirstOrDefault();
+
+                    //fix to not display events from the previous day
+                    if (eventTime.AllDay && eventTime.EndTime.Date == startDate)
+                        break;
+
                     var evnt = new Event();
                     result.Add(evnt);
-
-                    var eventTime = eventEntry.Times.FirstOrDefault();
+                    
                     if (eventTime != null && !eventTime.AllDay)
                         evnt.Time = eventTime.StartTime.ToString("HH:mm") + " - " + eventTime.EndTime.ToString("HH:mm");
 
