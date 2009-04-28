@@ -3,9 +3,20 @@
 This plugin fetches all events for today from your Google calendar(s).
 
 =Usage=
+===Enter your Google credentials===
+First you need to tell the plugin your Google credentials. Unfortunately, this also means it needs your Google password. The credentials will be stored in plain text in an SQLite database. This should be no problem for a "private" bot, but take care when using public ones!
 
-Type {{{gcal}}} to see your calendar events.
+Type the command below into your Jabber client to register the current Jabber user for these Google credentials. This needs to be done only once. The plugin will remember the Google credentials for all subsequent requests.
 
-But first you need to tell the plugin your Google credentials. Unfortunately, this also means it needs your Google password. The credentials will be stored in plain text in an SQLite database. This should be no problem for a "private" bot, but take care when using public ones!
+{{{gcal register <YOUR GOOGLE USERNAME> <YOUR GOOGLE PASSWORD>}}}
 
-Type {{{gcal register <YOUR GOOGLE USERNAME> <YOUR GOOGLE PASSWORD>}}} to register the current Jabber user for these Google credentials. This needs to be done only once. The plugin will remember the Google credentials for all subsequent requests.
+===Get your events for today===
+{{{gcal}}}
+
+===Get your events for tomorrow===
+{{{gcal 1}}}
+
+===Get your events for X days in the future===
+{{{gcal X}}}
+
+
