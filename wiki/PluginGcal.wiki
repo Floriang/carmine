@@ -34,5 +34,5 @@ Type the command below into your Jabber client to register the current Jabber us
 ===Add an event (with date and time)===
 {{{gcal add on <date, eg. 12-Apr-2010> at <time, eg. 11:00> <The event title>}}}
 
-===Add an event (time-span)===
+===Add an event (with time span)===
 {{{gcal add at <start time, eg. 11:00>-<end time> <The event title>}}}
