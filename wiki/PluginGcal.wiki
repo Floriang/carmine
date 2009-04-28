@@ -1,6 +1,6 @@
 #summary Description of the Google Calendar plugin
 
-This plugin fetches all events for today from your Google calendar(s).
+This plugin fetches events for a specific day from your Google calendar(s). You can also add events to any of your calendars using your Jabber client.
 
 =Usage=
 ===Enter your Google credentials===
@@ -19,4 +19,20 @@ Type the command below into your Jabber client to register the current Jabber us
 ===Get your events for X days in the future===
 {{{gcal X}}}
 
+===Add an event===
+{{{gcal add <The event title>}}}
 
+===Add an event (with location)===
+{{{gcal add <The event title> in <The event location>}}}
+
+===Add an event (specify calendar other than your default one)===
+{{{gcal add to -<name of the calendar> <The event title>}}}
+
+===Add an event (with date)===
+{{{gcal add on <date, eg. 12-Apr-2010> <The event title>}}}
+
+===Add an event (with date and time)===
+{{{gcal add on <date, eg. 12-Apr-2010> at <time, eg. 11:00> <The event title>}}}
+
+===Add an event (time-span)===
+{{{gcal add at <start time, eg. 11:00>-<end time> <The event title>}}}
