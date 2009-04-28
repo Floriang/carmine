@@ -26,7 +26,7 @@ Type the command below into your Jabber client to register the current Jabber us
 {{{gcal add <The event title> in <The event location>}}}
 
 ===Add an event (specify calendar other than your default one)===
-{{{gcal add to -<name of the calendar> <The event title>}}}
+{{{gcal add to <name of the calendar> <The event title>}}}
 
 ===Add an event (with date)===
 {{{gcal add on <date, eg. 12-Apr-2010> <The event title>}}}
