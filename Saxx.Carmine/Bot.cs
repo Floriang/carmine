@@ -155,11 +155,12 @@ namespace Saxx.Carmine {
         }
 
         private void client_OnError(object sender, Exception ex) {
-            if (ex is AuthenticationFailedException)
+            if (ex is AuthenticationFailedException) {
                 Log(LogType.Fatal, "Authentication failed. Check your Jabber credentials. The user you want to register probably already exists on the server.");
+                Environment.Exit(-1);
+            }
             else
                 Log(LogType.Fatal, "The Jabber client threw an exception: ", ex);
-            Environment.Exit(-1);
         }
 
         void client_OnRegistered(object sender, IQ iq) {
