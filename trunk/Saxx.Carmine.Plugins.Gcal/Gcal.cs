@@ -43,12 +43,12 @@ namespace Saxx.Carmine.Plugins {
                 PrintEvents(from, 0);
         }
 
-        private DateTime _lastDate = DateTime.Now.Date;
-        public override void Tick() {
-            if (_lastDate < DateTime.Now.Date) {
-                foreach (var userdata in GetUserData().Where(x => x.SendSummary))
-                    PrintEvents(userdata.Id, 0);
-                _lastDate = DateTime.Now.Date;
+        public override void ContactWentOnline(string from) {
+            var userData = GetUserData(from);
+            if (userData != null && userData.LastCheck.Date != DateTime.Now.Date) {
+                PrintEvents(userData.Id, 0);
+                userData.LastCheck = DateTime.Now.Date;
+                SetUserData(userData);
             }
         }
 

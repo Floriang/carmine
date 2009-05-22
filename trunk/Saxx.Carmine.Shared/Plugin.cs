@@ -16,6 +16,12 @@ namespace Saxx.Carmine {
         public virtual void Message(string from, string message) {
         }
 
+        public virtual void ContactWentOnline(string from) {
+        }
+
+        public virtual void ContactWentOffline(string from) {
+        }
+
         public virtual void Dispose() {
         }
 
