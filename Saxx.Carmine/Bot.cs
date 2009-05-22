@@ -11,6 +11,7 @@ using jabber.client;
 using jabber.connection.sasl;
 using jabber.protocol.client;
 using jabber.protocol.iq;
+using System.Linq;
 
 namespace Saxx.Carmine {
     public partial class Bot : MarshalByRefObject, IBot {
@@ -38,9 +39,11 @@ namespace Saxx.Carmine {
             _rosterManager.Stream = _client;
             _rosterManager.AutoAllow = AutoSubscriptionHanding.AllowAll;
             _rosterManager.AutoSubscribe = true;
+            _rosterManager.OnRosterItem += new RosterItemHandler(_rosterManager_OnRosterItem);
 
             _presenceManager = new PresenceManager();
             _presenceManager.Stream = _client;
+            _presenceManager.OnPrimarySessionChange += new PrimarySessionHandler(_presenceManager_OnPrimarySessionChange);
 
             _client.OnInvalidCertificate += new RemoteCertificateValidationCallback(client_OnInvalidCertificate);
             _client.OnError += new bedrock.ExceptionHandler(client_OnError);
@@ -65,6 +68,35 @@ namespace Saxx.Carmine {
                     Thread.Sleep(Settings.TickInterval);
                 }
             }));
+        }
+
+        void _presenceManager_OnPrimarySessionChange(object sender, JID bare) {
+            if (bare.Bare.Equals(_client.JID.Bare, StringComparison.InvariantCultureIgnoreCase))
+                return;
+
+            if (_presenceManager[bare] == null) {
+                foreach (var plugin in Plugins)
+                    try {
+                        plugin.ContactWentOffline(bare.ToString());
+                    }
+                    catch (Exception ex) {
+                        Log(LogType.Error, "A plugin threw an exception: ", ex);
+                    }
+            }
+            else {
+                foreach (var plugin in Plugins)
+                    try {
+                        plugin.ContactWentOnline(bare.ToString());
+                    }
+                    catch (Exception ex) {
+                        Log(LogType.Error, "A plugin threw an exception: ", ex);
+                    }
+            }
+        }
+
+        void _rosterManager_OnRosterItem(object sender, Item ri) {
+            if (ri.Subscription == Subscription.from) //to fix some strange issue with GTalk contacts not showing fully subscribed
+                _client.Subscribe(ri.JID, ri.Nickname, ri.GetGroups().Select(x => x.Name).ToArray());
         }
 
         private void InitPlugins() {
