@@ -31,9 +31,9 @@ namespace Saxx.Carmine {
         public Bot() {
             _client = new JabberClient();
             _client.AutoRoster = true;
-            _client.AutoReconnect = 0;
+            _client.AutoReconnect = 60;
             _client.AutoLogin = false;
-            _client.Resource = "Carmine";
+            _client.Resource = "Carmine " + Environment.Version.ToString();
 
             _rosterManager = new RosterManager();
             _rosterManager.Stream = _client;
