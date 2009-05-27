@@ -4,12 +4,12 @@ namespace Saxx.Carmine.Plugins {
     internal class ReminderInfo {
 
         public ReminderInfo(string to, string message, DateTime date) {
-            To = to;
+            Jid = to;
             Message = message;
             Date = date;
         }
         
-        public string To {
+        public string Jid {
             get;
             private set;
         }

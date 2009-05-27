@@ -1,41 +1,24 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
-using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
-using System.Threading;
-using System.Xml.Linq;
 
 namespace Saxx.Carmine.Plugins {
-    public class Reminder : Plugin {
+    public partial class Reminder : Plugin {
 
-        private Thread _thread;
+        private DateTime? _nextReminder;
+        public override void Tick() {
+            if (_nextReminder.HasValue && DateTime.Now < _nextReminder.Value)
+                return;
 
-        public override void Connected() {
-            _thread = new Thread(new ThreadStart(delegate() {
-                while (true) {
-                    var reminderInfos = LoadReminderInfos().ToList();
-                    var q = reminderInfos.Where(x => x.Date <= DateTime.Now);
-                    if (q.Count() > 0) {
-                        foreach (var reminderInfo in q)
-                            Bot.SendMessage(reminderInfo.To, "Hey, don't forget: " + reminderInfo.Message);
-                        SaveReminderInfos(reminderInfos.Where(x => !q.Contains(x)));
-                    }
-                    Thread.Sleep(30000);
-                }
-            }));
-            _thread.Start();
-        }
-
-        public override void Disconnect() {
-            if (_thread != null)
-                _thread.Abort();
-        }
-
-        public override void Dispose() {
-            if (_thread != null)
-                _thread.Abort();
+            var reminderInfos = GetReminderInfos().ToList();
+            var q = reminderInfos.Where(x => x.Date <= DateTime.Now).ToList();
+            if (q.Count() > 0) {
+                foreach (var reminderInfo in q)
+                    Bot.SendMessage(reminderInfo.Jid, "Hey, don't forget: " + reminderInfo.Message);
+                SetReminderInfos(reminderInfos.Where(x => !q.Contains(x)));
+            }
         }
 
         public override string ToString() {
@@ -45,28 +28,28 @@ namespace Saxx.Carmine.Plugins {
         public override void Message(string from, string message) {
             var date = DateTime.Now;
             var reminderMessage = "";
-            var reminderInfos = LoadReminderInfos().ToList();
+            var reminderInfos = GetReminderInfos().ToList();
 
-
-            if (message.Equals("get-reminders", StringComparison.InvariantCultureIgnoreCase)) {
-                PrintReminders(from);
+            if (message.Equals("remind get", StringComparison.InvariantCultureIgnoreCase)) {
+                SendMessage(from, PrintReminders(from));
                 return;
             }
-            else if (message.Equals("clear-all-reminders", StringComparison.InvariantCultureIgnoreCase) && Bot.IsOperator(from)) {
-                SaveReminderInfos(new List<ReminderInfo>());
+            else if (message.Equals("remind get all", StringComparison.InvariantCultureIgnoreCase) && Bot.IsOperator(from)) {
+                SendMessage(from, PrintReminders());
+                return;
+            }
+            else if (message.Equals("remind clear all", StringComparison.InvariantCultureIgnoreCase) && Bot.IsOperator(from)) {
+                SetReminderInfos(new List<ReminderInfo>());
                 Bot.SendMessage(from, "I deleted all reminders.");
                 return;
             }
-            else if (message.Equals("clear-reminders", StringComparison.InvariantCultureIgnoreCase)) {
+            else if (message.Equals("remind clear", StringComparison.InvariantCultureIgnoreCase)) {
                 ClearReminders(from);
-                return;
-            }
-            else if (message.Equals("syntax", StringComparison.InvariantCultureIgnoreCase)) {
-                PrintSyntax(from);
                 return;
             }
 
             var patterns = new string[] { 
+                @"^remind me in (?<minutes>\d{1,4})(?<message>.*?)$",
                 @"^remind me in( (?<hours>\d+):(?<minutes>\d+)){1}(?<message>.*?)$",
                 @"^remind me in((?<days> \d+)d)?((?<hours> \d+)h)?((?<minutes> \d+)m)?(?<message>.*?)$", 
                 @"^remind me on (?<day>\d{1,2}).(?<month>\d{1,2}).(?<year>\d{4}) at (?<hour>\d{1,2}):(?<minute>\d{1,2})(?<message>.*?)$",
@@ -140,7 +123,7 @@ namespace Saxx.Carmine.Plugins {
 
             if (!string.IsNullOrEmpty(reminderMessage)) {
                 reminderInfos.Add(new ReminderInfo(from, reminderMessage, date));
-                SaveReminderInfos(reminderInfos);
+                SetReminderInfos(reminderInfos);
 
                 if (date.Date == DateTime.Now.Date)
                     Bot.SendMessage(from, "I'll remind you at " + date.ToString("HH:mm", CultureInfo.InvariantCulture) + " about: " + reminderMessage);
@@ -151,72 +134,30 @@ namespace Saxx.Carmine.Plugins {
             }
         }
 
-        private void PrintReminders(string from) {
-            var result = "";
-            var reminders = LoadReminderInfos();
-            if (Bot.IsOperator(from)) {
-                result += "*All reminders*" + Environment.NewLine;
-            }
-            else {
-                reminders = reminders.Where(x => x.To.Equals(from, StringComparison.InvariantCultureIgnoreCase));
-                result += "*Your reminders*" + Environment.NewLine;
-            }
+        private string PrintReminders(string from) {
+            var reminders = GetReminderInfos().Where(x => x.Jid.Equals(from, StringComparison.InvariantCultureIgnoreCase));
+            var result = "*Your reminders:*" + Environment.NewLine;
 
             foreach (var reminder in reminders)
-                result += reminder.Date.ToString("dd.MM.yyyy HH:mm") + " - " + reminder.Message + (!reminder.To.Equals(from, StringComparison.InvariantCultureIgnoreCase) ? " (" + reminder.To + ")" : "") + Environment.NewLine;
+                result += reminder.Date.ToString("dd.MM.yyyy HH:mm") + " - " + reminder.Message + Environment.NewLine;
 
-            Bot.SendMessage(from, result);
+            return result;
+        }
+
+        private string PrintReminders() {
+            var reminders = GetReminderInfos();
+            var result = "*All reminders:*" + Environment.NewLine;
+
+            foreach (var reminder in reminders)
+                result += reminder.Date.ToString("dd.MM.yyyy HH:mm") + " - " + reminder.Message + " (" + reminder.Jid + ")" + Environment.NewLine;
+
+            return result;
         }
 
         private void ClearReminders(string from) {
-            SaveReminderInfos(LoadReminderInfos().Where(x => !x.To.Equals(from, StringComparison.InvariantCultureIgnoreCase)));
+            SetReminderInfos(GetReminderInfos().Where(x => !x.Jid.Equals(from, StringComparison.InvariantCultureIgnoreCase)));
             Bot.SendMessage(from, "I deleted all reminders of yours.");
         }
-
-        private void PrintSyntax(string from) {
-            var result = "*Reminder Syntax*" + Environment.NewLine + Environment.NewLine;
-
-            result += "remind me in [<days>d] [<hours>h] [<minutes>m] [<message>]" + Environment.NewLine + "_adds a reminder to fire in the specified days, hours and minutes._" + Environment.NewLine + Environment.NewLine;
-            result += "remind me in <hours>:<minutes> [<message>]" + Environment.NewLine + "_adds a reminder to fire in the specified hours and minutes._" + Environment.NewLine + Environment.NewLine;
-            result += "remind me [on <day>.<month>.<year>] at <hour>:<minute> [<message>]" + Environment.NewLine + "_adds a reminder to fire at the specified date and time._" + Environment.NewLine + Environment.NewLine;
-            result += "get-reminders" + Environment.NewLine + "_prints all reminders._" + Environment.NewLine + Environment.NewLine;
-            result += "clear-reminders" + Environment.NewLine + "_deletes all reminders of yours._" + Environment.NewLine + Environment.NewLine;
-            result += "clear-all-reminders" + Environment.NewLine + "_deletes all reminders (operators only)._" + Environment.NewLine + Environment.NewLine;
-
-            Bot.SendMessage(from, result);
-        }
-
-        #region Read and write XML
-        private void SaveReminderInfos(IEnumerable<ReminderInfo> reminderInfos) {
-            var xml = new XDocument();
-            xml.Add(
-                    new XElement("reminders", from x in reminderInfos
-                                              select new XElement("reminder", 
-                                                  new XElement("to", x.To), 
-                                                  new XElement("message", new XCData(x.Message)), 
-                                                  new XElement("date", x.Date.ToString(CultureInfo.InvariantCulture))
-                                              )
-                                )
-                    );
-            xml.Save(XmlPath);
-        }
-
-        private IEnumerable<ReminderInfo> LoadReminderInfos() {
-            var result = new List<ReminderInfo>();
-            if (File.Exists(XmlPath)) {
-                var xml = XDocument.Load(XmlPath);
-                foreach (var node in xml.Element("reminders").Elements("reminder"))
-                    result.Add(new ReminderInfo(node.Element("to").Value, node.Element("message").Value, DateTime.Parse(node.Element("date").Value, CultureInfo.InvariantCulture)));
-            }
-            return result.OrderBy(x => x.Date);
-        }
-
-        private string XmlPath {
-            get {
-                return Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"Plugins\Reminder.xml");
-            }
-        }
-        #endregion
 
     }
 }
