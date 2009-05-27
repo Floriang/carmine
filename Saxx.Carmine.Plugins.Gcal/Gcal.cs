@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using System.Text.RegularExpressions;
 using Google.GData.Calendar;
 using Google.GData.Client;
-using System.Data;
 
 namespace Saxx.Carmine.Plugins {
     public partial class Gcal : Plugin {
