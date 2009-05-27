@@ -8,9 +8,11 @@ This plugin notifies you at a specified time. It is very helpful to remember qui
 
 {{{remind me in 0:30 about Pizza}}}
 
-{{{remind me in 30m about Pizza}}}
+{{{remind me in 30m Pizza}}}
 
-{{{remind me in 1h 30m about Pizza is probably a little dusty by now}}}
+{{{remind me in 30 about Pizza}}}
+
+{{{remind me in 1h 30m Pizza is probably a little dusty by now}}}
 
 ===Remind me at a specific time today===
 
@@ -18,6 +20,18 @@ This plugin notifies you at a specified time. It is very helpful to remember qui
 
 ===Remind me at a specific date and time===
 
-{{{remind me on 01.01.2010 at 00:00 about Happy New Year!}}}
+{{{remind me on 01.01.2010 at 00:00 Happy New Year!}}}
 
-Carmine answers with a short confirmation and will come back to you with your reminder at the specified time.
+Carmine answers with a short confirmation and will come back to you with your reminder at the specified time. There are also a few additional commands to display and remove reminders:
+
+===Display all reminders===
+{{{remind get}}}
+
+===Delete all reminders===
+{{{remind clear}}}
+
+===Display all reminders from all users (operators only)===
+{{{remind get all}}}
+
+===Delete all reminders from all users (operators only)===
+{{{remind clear all}}}
