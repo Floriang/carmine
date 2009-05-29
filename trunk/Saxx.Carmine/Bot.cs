@@ -31,7 +31,6 @@ namespace Saxx.Carmine {
         public Bot() {
             _client = new JabberClient();
             _client.AutoRoster = true;
-            _client.AutoReconnect = 60;
             _client.AutoLogin = false;
             _client.Resource = "Carmine " + Environment.Version.ToString();
 
@@ -191,8 +190,14 @@ namespace Saxx.Carmine {
                 Log(LogType.Fatal, "Authentication failed. Check your Jabber credentials. The user you want to register probably already exists on the server.");
                 Environment.Exit(-1);
             }
-            else
-                Log(LogType.Fatal, "The Jabber client threw an exception: ", ex);
+            Log(LogType.Fatal, "The Jabber client threw an exception: ", ex);
+
+            //reconnect after 30 to 60 seconds until we're connected
+            new Thread(new ThreadStart(delegate() {
+                Thread.Sleep(new Random().Next(30000, 60000));
+                Log(LogType.Info, "Trying to reconnect");
+                Connect();
+            }));
         }
 
         void client_OnRegistered(object sender, IQ iq) {
