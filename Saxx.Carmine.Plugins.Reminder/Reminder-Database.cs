@@ -26,7 +26,6 @@ namespace Saxx.Carmine.Plugins {
         }
 
         private void SetReminderInfos(IEnumerable<ReminderInfo> reminderInfos) {
-            Log(LogType.Info, "Saving all reminderinfos");
             using (var db = GetDatabase(DatabaseName)) {
                 SetupDatabase(db);
 
@@ -40,7 +39,6 @@ namespace Saxx.Carmine.Plugins {
 
         private IEnumerable<ReminderInfo> GetReminderInfos() {
             var result = new List<ReminderInfo>();
-            Log(LogType.Info, "Loading all reminderinfos");
             using (var db = GetDatabase(DatabaseName)) {
                 SetupDatabase(db);
 
