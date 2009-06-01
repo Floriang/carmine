@@ -46,8 +46,8 @@ namespace Saxx.Carmine {
             Bot.SetStatus(newStatus);
         }
 
-        public bool IsOperator(string from) {
-            return Bot.IsOperator(from);
+        public bool IsOperator(string jid) {
+            return Bot.IsOperator(jid);
         }
 
         public void Log(LogType type, string message, Exception ex) {
@@ -56,6 +56,10 @@ namespace Saxx.Carmine {
 
         public void Log(LogType type, string message) {
             Bot.Log(type, message);
+        }
+
+        public bool IsAvailable(string jid) {
+            return Bot.IsAvailable(jid);
         }
         #endregion
 

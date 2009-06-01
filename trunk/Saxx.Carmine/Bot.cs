@@ -98,6 +98,10 @@ namespace Saxx.Carmine {
                 _client.Subscribe(ri.JID, ri.Nickname, ri.GetGroups().Select(x => x.Name).ToArray());
         }
 
+        public bool IsAvailable(string jid) {
+            return _presenceManager.IsAvailable(jid);
+        }
+
         private void InitPlugins() {
             Log(LogType.Info, "Initiating plugins");
 
@@ -135,21 +139,25 @@ namespace Saxx.Carmine {
             _client.Password = Settings.JabberPassword;
             _client.Connect();
 
-            while (!_client.IsAuthenticated)
+            var retryCount = 50;
+            while (!_client.IsAuthenticated && retryCount-- > 0)
                 Thread.Sleep(500);
 
-            SetStatus("I'm online.");
+            if (_client.IsAuthenticated) {
+                Log(LogType.Info, "Authenticated");
+                SetStatus("I'm online.");
 
-            foreach (var plugin in Plugins)
-                try {
-                    plugin.Connected();
-                }
-                catch (Exception ex) {
-                    Log(LogType.Error, "A plugin threw an exception: ", ex);
-                }
+                foreach (var plugin in Plugins)
+                    try {
+                        plugin.Connected();
+                    }
+                    catch (Exception ex) {
+                        Log(LogType.Error, "A plugin threw an exception: ", ex);
+                    }
 
-            _stopThread = false;
-            _thread.Start();
+                _stopThread = false;
+                _thread.Start();
+            }
         }
 
         public void Disconnect() {
@@ -158,6 +166,9 @@ namespace Saxx.Carmine {
             _pluginManager.Stop();
 
             _stopThread = true;
+
+            System.Threading.Thread.Sleep(30000);
+            Connect();
         }
 
         private void client_OnDisconnect(object sender) {
@@ -168,6 +179,8 @@ namespace Saxx.Carmine {
                 catch (Exception ex) {
                     Log(LogType.Error, "A plugin threw an exception: ", ex);
                 }
+
+            Log(LogType.Info, "Disconnected");
         }
 
         private void client_OnMessage(object sender, Message msg) {
@@ -191,13 +204,6 @@ namespace Saxx.Carmine {
                 Environment.Exit(-1);
             }
             Log(LogType.Fatal, "The Jabber client threw an exception: ", ex);
-
-            //reconnect after 30 to 60 seconds until we're connected
-            new Thread(new ThreadStart(delegate() {
-                Thread.Sleep(new Random().Next(30000, 60000));
-                Log(LogType.Info, "Trying to reconnect");
-                Connect();
-            }));
         }
 
         void client_OnRegistered(object sender, IQ iq) {
