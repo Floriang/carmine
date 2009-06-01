@@ -49,9 +49,9 @@ namespace Saxx.Carmine.Plugins {
             }
 
             var patterns = new string[] { 
-                @"^remind me in (?<minutes>\d{1,4})(?<message>.*?)$",
                 @"^remind me in( (?<hours>\d+):(?<minutes>\d+)){1}(?<message>.*?)$",
                 @"^remind me in((?<days> \d+)d)?((?<hours> \d+)h)?((?<minutes> \d+)m)?(?<message>.*?)$", 
+                @"^remind me in (?<minutes>\d{1,4})(?<message>.*?)$",
                 @"^remind me on (?<day>\d{1,2}).(?<month>\d{1,2}).(?<year>\d{4}) at (?<hour>\d{1,2}):(?<minute>\d{1,2})(?<message>.*?)$",
                 @"^remind me on (?<day>\d{1,2}).(?<month>\d{1,2}). at (?<hour>\d{1,2}):(?<minute>\d{1,2})(?<message>.*?)$",
                 @"^remind me at (?<hour>\d{1,2}):(?<minute>\d{1,2})(?<message>.*?)$"
