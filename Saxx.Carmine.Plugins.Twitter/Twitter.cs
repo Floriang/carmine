@@ -61,18 +61,22 @@ namespace Saxx.Carmine.Plugins {
             }
         }
 
+        private DateTime _lastCheck = DateTime.MinValue;
         public override void Tick() {
-            var userData =  GetUserData().ToList();
-            bool updateUserData = false;
+            if (_lastCheck.AddMinutes(2) < DateTime.Now) { //only check every two minute
+                _lastCheck = DateTime.Now;
+                var userData = GetUserData().ToList();
+                bool updateUserData = false;
 
-            foreach (var user in userData) 
-                if (IsAvailable(user.Jid)) {
-                    WriteTimeline(user, false);
-                    updateUserData = true;
-                }
+                foreach (var user in userData)
+                    if (IsAvailable(user.Jid)) {
+                        WriteTimeline(user, false);
+                        updateUserData = true;
+                    }
 
-            if (updateUserData)
-                SetUserData(userData);
+                if (updateUserData)
+                    SetUserData(userData);
+            }
         }
 
         private void SetStatus(UserData user, string status) {
@@ -103,7 +107,7 @@ namespace Saxx.Carmine.Plugins {
                 using (var reader = new StreamReader(request.GetResponse().GetResponseStream())) {
                     var xml = XDocument.Load(reader);
                     foreach (var element in xml.Root.Elements("status")) {
-                        var text = element.Element("text").Value;
+                        var text = HttpUtility.HtmlDecode(element.Element("text").Value);
                         var from = element.Element("user").Element("screen_name").Value;
                         var id = Convert.ToInt32(element.Element("id").Value);
 

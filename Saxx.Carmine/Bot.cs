@@ -56,15 +56,20 @@ namespace Saxx.Carmine {
             InitPlugins();
 
             _thread = new Thread(new ThreadStart(delegate() {
+                var timeLeft = Settings.TickInterval;
                 while (!_stopThread) {
-                    foreach (var plugin in Plugins)
-                        try {
-                            plugin.Tick();
-                        }
-                        catch (Exception ex) {
-                            Log(LogType.Error, "A plugin threw an exception: ", ex);
-                        }
-                    Thread.Sleep(Settings.TickInterval);
+                    if (timeLeft <= 0) {
+                        foreach (var plugin in Plugins)
+                            try {
+                                plugin.Tick();
+                            }
+                            catch (Exception ex) {
+                                Log(LogType.Error, "A plugin threw an exception: ", ex);
+                            }
+                        timeLeft = Settings.TickInterval;
+                    }
+                    timeLeft -= 1000;
+                    Thread.Sleep(1000); //we don't sleep the entire tick interval, because ending the bot would take too long then.
                 }
             }));
         }
@@ -166,9 +171,6 @@ namespace Saxx.Carmine {
             _pluginManager.Stop();
 
             _stopThread = true;
-
-            System.Threading.Thread.Sleep(30000);
-            Connect();
         }
 
         private void client_OnDisconnect(object sender) {
