@@ -130,7 +130,6 @@ namespace Saxx.Carmine.Plugins {
 
         private IEnumerable<UserData> GetUserData() {
             var result = new List<UserData>();
-            Log(LogType.Info, "Loading all user data");
             using (var db = GetDatabase(DatabaseName)) {
                 SetupDatabase(db);
 
@@ -143,7 +142,6 @@ namespace Saxx.Carmine.Plugins {
         }
 
         private UserData GetUserData(string id) {
-            Log(LogType.Info, "Loading user data for " + id);
             using (var db = GetDatabase(DatabaseName)) {
                 SetupDatabase(db);
 
@@ -155,7 +153,6 @@ namespace Saxx.Carmine.Plugins {
         }
 
         private void SetUserData(UserData userData) {
-            Log(LogType.Info, "Saving user data for " + userData.Id);
             using (var db = GetDatabase(DatabaseName)) {
                 SetupDatabase(db);
                 db.ExecuteCommand("DELETE FROM [UserData] WHERE [Id] = ?;", userData.Id);

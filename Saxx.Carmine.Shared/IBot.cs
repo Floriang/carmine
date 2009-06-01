@@ -6,7 +6,8 @@ namespace Saxx.Carmine {
 
         void SendMessage(string to, string message);
         void SetStatus(string status);
-        bool IsOperator(string from);
+        bool IsOperator(string jid);
+        bool IsAvailable(string jid);
        
         void Log(LogType type, string message, Exception ex);
         void Log(LogType type, string message);
