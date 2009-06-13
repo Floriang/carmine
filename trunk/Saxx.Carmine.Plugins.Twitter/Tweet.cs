@@ -2,7 +2,7 @@
 namespace Saxx.Carmine.Plugins {
     internal class Tweet {
 
-        public Tweet(string from, string status, int id) {
+        public Tweet(string from, string status, long id) {
             From = from;
             Status = status;
             Id = id;
@@ -18,7 +18,7 @@ namespace Saxx.Carmine.Plugins {
             private set;
         }
 
-        public int Id {
+        public long Id {
             get;
             private set;
         }
