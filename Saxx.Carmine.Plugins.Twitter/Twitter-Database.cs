@@ -14,7 +14,7 @@ namespace Saxx.Carmine.Plugins {
                     + "[Jid] NVARCHAR(1000) NOT NULL,"
                     + "[UserName] NVARCHAR(1000) NOT NULL,"
                     + "[Password] NVARCHAR(1000) NOT NULL,"
-                    + "[LastId] INT NOT NULL"
+                    + "[LastId] LONG NOT NULL"
                     + ");");
                 db.ExecuteCommand("PRAGMA auto_vacuum = 1;");
             }
@@ -47,7 +47,7 @@ namespace Saxx.Carmine.Plugins {
                         Jid = (string)reader["Jid"],
                         UserName = (string)reader["UserName"],
                         Password = (string)reader["Password"],
-                        LastId = (int)reader["LastId"]
+                        LastId = (long)reader["LastId"]
                     });
             }
 
@@ -70,7 +70,7 @@ namespace Saxx.Carmine.Plugins {
                 set;
             }
 
-            public int LastId {
+            public long LastId {
                 get;
                 set;
             }

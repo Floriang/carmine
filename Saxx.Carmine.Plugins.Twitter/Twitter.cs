@@ -99,7 +99,7 @@ namespace Saxx.Carmine.Plugins {
             }
         }
 
-        private void SetStatus(UserData user, string status, int replyTo) {
+        private void SetStatus(UserData user, string status, long replyTo) {
             try {
                 var request = WebRequest.Create("http://twitter.com/statuses/update.xml");
                 request.Credentials = new NetworkCredential(user.UserName, user.Password);
@@ -123,7 +123,7 @@ namespace Saxx.Carmine.Plugins {
         }
 
         private void Reply(UserData user, int countBack, string status) {
-            var tweets = GetTweets(user, 0).OrderByDescending(x => x.Id);
+            var tweets = GetTweets(user, 0, true).OrderByDescending(x => x.Id);
             countBack--;
             if (countBack >= tweets.Count())
                 countBack = 0;
@@ -132,7 +132,7 @@ namespace Saxx.Carmine.Plugins {
         }
 
         private void WriteTimeline(UserData user, bool answerAlways) {
-            var tweets = GetTweets(user, user.LastId);
+            var tweets = GetTweets(user, user.LastId, answerAlways);
             var message = "";
 
             foreach (var tweet in tweets) {
@@ -148,7 +148,7 @@ namespace Saxx.Carmine.Plugins {
                 SendMessage(user.Jid, "No new statuses available.");
         }
 
-        private IEnumerable<Tweet> GetTweets(UserData user, int startAt) {
+        private IEnumerable<Tweet> GetTweets(UserData user, long startAt, bool sendErrors) {
             var tweets = new List<Tweet>();
 
             try {
@@ -160,7 +160,7 @@ namespace Saxx.Carmine.Plugins {
                     foreach (var element in xml.Root.Elements("status")) {
                         var text = HttpUtility.HtmlDecode(element.Element("text").Value);
                         var from = element.Element("user").Element("screen_name").Value;
-                        var id = Convert.ToInt32(element.Element("id").Value);
+                        var id = Convert.ToInt64(element.Element("id").Value);
 
                         tweets.Add(new Tweet(from, text, id));
                     }
