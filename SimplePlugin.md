@@ -1,0 +1,17 @@
+It is extremely easy to add a plugin to carmine - just drop an assembly or even a plain C# or VB.NET source file into the `\Plugins\` subdirectory of your Carmine installation.
+
+An example: Paste the code below into a textfile called `HelloWorld.cs` and put it into the `\Plugins\` subdirectory. It takes only a few seconds while Carmine recognizes this new plugin (no need to restart), compiles it on the fly and makes it available. Try it out by sending Carmine a `Hello` through your Jabber client.
+
+```
+using System;
+using Saxx.Carmine;
+
+public class Ping : Plugin {
+    public override void Message(string from, string message) {
+        if (message == "Hello")         
+            SendMessage(from, "Hey!");
+    }
+}
+```
+
+The only thing you have to remember when writing a plugin is to derive your class from `Saxx.Carmine.Plugin`. This abstract class provides a lot of methods you can overwrite to add functionality to your plugin. The overridden method `Message` in the example above is probably the most important one - it gets called whenever somebody sends a message to Carmine.

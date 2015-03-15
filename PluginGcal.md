@@ -1,0 +1,36 @@
+This plugin fetches events for a specific day from your Google calendar(s). You can also add events to any of your calendars using your Jabber client.
+
+# Usage #
+### Enter your Google credentials ###
+First you need to tell the plugin your Google credentials. Unfortunately, this also means it needs your Google password. The credentials will be stored in plain text in an SQLite database. This should be no problem for a "private" bot, but take care when using public ones!
+
+Type the command below into your Jabber client to register the current Jabber user for these Google credentials. This needs to be done only once. The plugin will remember the Google credentials for all subsequent requests.
+
+`gcal register <YOUR GOOGLE USERNAME> <YOUR GOOGLE PASSWORD>`
+
+### Get your events for today ###
+`gcal`
+
+### Get your events for tomorrow ###
+`gcal 1`
+
+### Get your events for X days in the future ###
+`gcal X`
+
+### Add an event ###
+`gcal add <The event title>`
+
+### Add an event (with location) ###
+`gcal add <The event title> in <The event location>`
+
+### Add an event (specify calendar other than your default one) ###
+`gcal add to <name of the calendar> <The event title>`
+
+### Add an event (with date) ###
+`gcal add on <date, eg. 12-Apr-2010> <The event title>`
+
+### Add an event (with date and time) ###
+`gcal add on <date, eg. 12-Apr-2010> at <time, eg. 11:00> <The event title>`
+
+### Add an event (with time span) ###
+`gcal add at <start time, eg. 11:00>-<end time> <The event title>`
