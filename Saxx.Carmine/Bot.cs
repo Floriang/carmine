@@ -31,8 +31,8 @@ namespace Saxx.Carmine {
         public Bot() {
             _client = new JabberClient();
             _client.AutoRoster = true;
-            _client.AutoLogin = false;
-            _client.Resource = "Carmine " + Environment.Version.ToString();
+            _client.AutoLogin = Settings.JabberAutoLogin;
+            _client.Resource = Settings.JabberResource;
 
             _rosterManager = new RosterManager();
             _rosterManager.Stream = _client;
@@ -142,6 +142,7 @@ namespace Saxx.Carmine {
             _client.User = Settings.JabberUser;
             _client.Server = Settings.JabberServer;
             _client.Password = Settings.JabberPassword;
+            _client.NetworkHost = Settings.JabberNetworkHost;
             _client.Connect();
 
             var retryCount = 50;
@@ -150,7 +151,7 @@ namespace Saxx.Carmine {
 
             if (_client.IsAuthenticated) {
                 Log(LogType.Info, "Authenticated");
-                SetStatus("I'm online.");
+                SetStatus(Settings.JabberStatus);
 
                 foreach (var plugin in Plugins)
                     try {
@@ -186,14 +187,25 @@ namespace Saxx.Carmine {
         }
 
         private void client_OnMessage(object sender, Message msg) {
-            Log(LogType.Info, "Message received from " + msg.From.User + "@" + msg.From.Server + ": " + msg.Body);
-            foreach (var plugin in Plugins)
-                try {
-                    plugin.Message(msg.From.User + "@" + msg.From.Server, msg.Body);
-                }
-                catch (Exception ex) {
-                    Log(LogType.Error, "A plugin threw an exception: ", ex);
-                }
+            if (msg.Body == null)
+            {
+                // If Body is null, it's not a chat but notifications (composing, paused, etc.)
+                // => we do nothing, but we have to manage this case in order to prevent NullException.
+                // TODO: We can manage these notifications later.
+            }
+            else
+            {
+                Log(LogType.Info, "Message received from " + msg.From.User + "@" + msg.From.Server + ": " + msg.Body);
+                foreach (var plugin in Plugins)
+                    try
+                    {
+                        plugin.Message(msg.From.User + "@" + msg.From.Server, msg.Body);
+                    }
+                    catch (Exception ex)
+                    {
+                        Log(LogType.Error, "A plugin threw an exception: ", ex);
+                    }
+            }
         }
 
         private bool client_OnInvalidCertificate(object sender, X509Certificate certificate, X509Chain chain, SslPolicyErrors sslPolicyErrors) {

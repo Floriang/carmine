@@ -28,9 +28,37 @@ namespace Saxx.Carmine {
             }
         }
 
+        public static string JabberNetworkHost {
+            get
+            {
+                return Get("network-host", "");
+            }
+        }
+
+        public static string JabberResource {
+            get
+            {
+                return Get("resource", "Carmine " + Environment.Version.ToString());
+            }
+        }
+
         public static string JabberServer {
             get {
                 return Get("server", "jabber.org");
+            }
+        }
+
+        public static string JabberStatus {
+            get
+            {
+                return Get("status", "");
+            }
+        }
+
+        public static bool JabberAutoLogin {
+            get
+            {
+                return Get("auto-login", false);
             }
         }
 
@@ -48,7 +76,8 @@ namespace Saxx.Carmine {
 
         public static string RootDirectory {
             get {
-                return Path.GetDirectoryName(Environment.GetCommandLineArgs()[0]);
+                string[] args = Environment.GetCommandLineArgs();
+                return (string.IsNullOrEmpty(args[0])) ? "" : Path.GetDirectoryName(args[0]);
             }
         }
 
