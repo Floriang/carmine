@@ -1,6 +1,8 @@
 ﻿
-Microsoft Visual Studio Solution File, Format Version 10.00
-# Visual Studio 2008
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.31911.196
+MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Saxx.Carmine", "Saxx.Carmine\Saxx.Carmine.csproj", "{5B3D26C1-8ECA-444D-8CD7-FCF93AB82654}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Saxx.Carmine.Shared", "Saxx.Carmine.Shared\Saxx.Carmine.Shared.csproj", "{97CB86F1-D300-4F3F-AB1F-C7730F13E521}"
@@ -40,5 +42,8 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {6A57A514-A0F0-4569-A7A2-B4C04FE0A60B}
 	EndGlobalSection
 EndGlobal
