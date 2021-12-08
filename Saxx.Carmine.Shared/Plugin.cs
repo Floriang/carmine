@@ -42,6 +42,10 @@ namespace Saxx.Carmine {
             Bot.SendMessage(to, message);
         }
 
+        public void SendMessageXHTML(string to, string message) {
+            Bot.SendMessageXHTML(to, message);
+        }
+
         public void SetStatus(string newStatus) {
             Bot.SetStatus(newStatus);
         }

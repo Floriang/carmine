@@ -11,6 +11,18 @@ namespace Saxx.Carmine {
             _client.Message(to, message);
         }
 
+        public void SendMessageXHTML(string to, string message) {
+            Log(LogType.Info, "Sending XHTML message to " + to + ": " + message);
+
+            Message msg = new Message(_client.Document);
+            msg.Type = MessageType.chat; // we send a chat message, not a normal message
+            msg.Body = System.Text.RegularExpressions.Regex.Replace(message, @"(<\/?\w+((\s+\w+(\s*=\s*(?:"".*?""|'.*?'|[^'"">\s]+))?)+\s*|\s*)\/?>)|()", ""); // deleting XHTML tags => Convert XHTML to text
+            msg.To = to;
+            msg.Html = message;
+
+            _client.Write(msg);
+        }
+
         public void SetStatus(string status) {
             Log(LogType.Info, "Setting status to " + status + "");
             _client.Presence(PresenceType.available, status, null, 0);

@@ -5,6 +5,7 @@ namespace Saxx.Carmine {
     public interface IBot {
 
         void SendMessage(string to, string message);
+        void SendMessageXHTML(string to, string message);
         void SetStatus(string status);
         bool IsOperator(string jid);
         bool IsAvailable(string jid);
